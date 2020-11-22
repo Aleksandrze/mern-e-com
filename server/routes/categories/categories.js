@@ -43,8 +43,11 @@ router.post("/create", [authMiddleware, adminMiddleware], async (req, res) => {
 });
 
 router.delete("/:id", [authMiddleware, adminMiddleware], async (req, res) => {
-    // delete category from db
-    // use req.params.id
+	const category = await Category.findOneAndDelete({_id: req.params.id});
+	if(category){
+		return res.status(200).json(category);
+	}
+	res.status(500).json({error: "Category was not found"});
 });
 
 module.exports = router;
