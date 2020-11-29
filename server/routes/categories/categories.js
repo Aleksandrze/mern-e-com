@@ -31,17 +31,47 @@ router.get("/:id", async (req, res) => {
     });
 });
 
+/**
+* @method  PUT
+* @route   /categories/:id
+*
+*/
 router.put("/:id", [authMiddleware, adminMiddleware], async (req, res) => {
-    // update category in db
-    // new data is located in req.body
-    // just override it
+	if(req.category._id ===req.params.id){
+		const category = await Category.findOneAndUpdate(
+		{_id: req.params.id},
+			{
+				name: req.body.name || req.category.name,
+				description: req.body.description || req.category.description,
+			}
+		);
+		return res.status(200).json(category);
+	}
+	res.status(500).json({error: "You do not have permissions."})
 });
-
+/** 
+ * add new categoryall 
+ * data is stored in req.body
+ */
 router.post("/create", [authMiddleware, adminMiddleware], async (req, res) => {
-    // add new category
-    // all data is stored in req.body
+	const category = await Category.findOne({name: req.body.name});
+	if(category){
+		return res.status(403).json({error: "Category already exits" });
+	}
+	const newCategory =await new Category({
+		name: req.body.name,
+		description: req.body.description,
+	}).save();
+
+
 });
 
+/**
+* Remove unique Category from DB via id.
+* @method  DELETE
+* @route   /categories/:id
+*
+*/
 router.delete("/:id", [authMiddleware, adminMiddleware], async (req, res) => {
 	const category = await Category.findOneAndDelete({_id: req.params.id});
 	if(category){
